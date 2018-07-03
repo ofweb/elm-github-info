@@ -1,0 +1,309 @@
+var _user$project$Main$viewRepo = function (githubRepo) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$a,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$href(githubRepo.link),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(githubRepo.name),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(
+					A2(_elm_lang$core$Basics_ops['++'], ' ', githubRepo.description)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						A2(_elm_lang$core$Basics_ops['++'], ' made in ', githubRepo.language)),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _user$project$Main$viewUser = function (githubUser) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$a,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$href(githubUser.link),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$img,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$src(githubUser.avatar),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$width(100),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$height(100),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$alt(githubUser.name),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						},
+						{ctor: '[]'}),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Main$initialModel = {owner: _elm_lang$core$Maybe$Nothing, repo: _elm_lang$core$Maybe$Nothing, ownerInput: '', repoInput: ''};
+var _user$project$Main$GithubUser = F4(
+	function (a, b, c, d) {
+		return {name: a, avatar: b, link: c, login: d};
+	});
+var _user$project$Main$userDecoder = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_user$project$Main$GithubUser,
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'avatar_url', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'html_url', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'login', _elm_lang$core$Json_Decode$string));
+var _user$project$Main$lookUpUser = function (query) {
+	return A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], 'https://api.github.com/users/', query),
+		_user$project$Main$userDecoder);
+};
+var _user$project$Main$GithubRepo = F4(
+	function (a, b, c, d) {
+		return {description: a, language: b, link: c, name: d};
+	});
+var _user$project$Main$repoDecoder = A3(
+	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+	'name',
+	_elm_lang$core$Json_Decode$string,
+	A3(
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+		'html_url',
+		_elm_lang$core$Json_Decode$string,
+		A3(
+			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+			'language',
+			_elm_lang$core$Json_Decode$string,
+			A3(
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+				'description',
+				_elm_lang$core$Json_Decode$string,
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Main$GithubRepo)))));
+var _user$project$Main$lookUpRepo = F2(
+	function (user, query) {
+		return A2(
+			_elm_lang$http$Http$get,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'https://api.github.com/repos/',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					user,
+					A2(_elm_lang$core$Basics_ops['++'], '/', query))),
+			_user$project$Main$repoDecoder);
+	});
+var _user$project$Main$Model = F4(
+	function (a, b, c, d) {
+		return {ownerInput: a, owner: b, repoInput: c, repo: d};
+	});
+var _user$project$Main$NoOp = {ctor: 'NoOp'};
+var _user$project$Main$RepoResp = function (a) {
+	return {ctor: 'RepoResp', _0: a};
+};
+var _user$project$Main$RepoCheck = {ctor: 'RepoCheck'};
+var _user$project$Main$RepoChange = function (a) {
+	return {ctor: 'RepoChange', _0: a};
+};
+var _user$project$Main$OwnerResp = function (a) {
+	return {ctor: 'OwnerResp', _0: a};
+};
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'NoOp':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'OwnerChange':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{ownerInput: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'OwnerCheck':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$http$Http$send,
+						_user$project$Main$OwnerResp,
+						_user$project$Main$lookUpUser(model.ownerInput))
+				};
+			case 'OwnerResp':
+				if (_p0._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								owner: _elm_lang$core$Maybe$Just(_p0._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{owner: _elm_lang$core$Maybe$Nothing}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'RepoChange':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{repoInput: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'RepoCheck':
+				var _p1 = model.owner;
+				if (_p1.ctor === 'Just') {
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: A2(
+							_elm_lang$http$Http$send,
+							_user$project$Main$RepoResp,
+							A2(_user$project$Main$lookUpRepo, _p1._0.login, model.repoInput))
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{repo: _elm_lang$core$Maybe$Nothing}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			default:
+				if (_p0._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								repo: _elm_lang$core$Maybe$Just(_p0._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{repo: _elm_lang$core$Maybe$Nothing}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+		}
+	});
+var _user$project$Main$OwnerCheck = {ctor: 'OwnerCheck'};
+var _user$project$Main$OwnerChange = function (a) {
+	return {ctor: 'OwnerChange', _0: a};
+};
+var _user$project$Main$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$input,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$placeholder('Owner'),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$OwnerChange),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onBlur(_user$project$Main$OwnerCheck),
+							_1: {ctor: '[]'}
+						}
+					}
+				},
+				{ctor: '[]'}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$core$Maybe$withDefault,
+					_elm_lang$html$Html$text('user not found'),
+					A2(_elm_lang$core$Maybe$map, _user$project$Main$viewUser, model.owner)),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$br,
+						{ctor: '[]'},
+						{ctor: '[]'}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$input,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$placeholder('Repo'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$RepoChange),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onBlur(_user$project$Main$RepoCheck),
+										_1: {ctor: '[]'}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$core$Maybe$withDefault,
+								_elm_lang$html$Html$text('repo not found'),
+								A2(_elm_lang$core$Maybe$map, _user$project$Main$viewRepo, model.repo)),
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			}
+		});
+};
+var _user$project$Main$main = _elm_lang$html$Html$program(
+	{
+		init: {ctor: '_Tuple2', _0: _user$project$Main$initialModel, _1: _elm_lang$core$Platform_Cmd$none},
+		view: _user$project$Main$view,
+		update: _user$project$Main$update,
+		subscriptions: function (_p2) {
+			return _elm_lang$core$Platform_Sub$none;
+		}
+	})();

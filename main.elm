@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (alt, height, href, placeholder, src, width)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onBlur)
 import Http
 import Json.Decode as Json exposing (Decoder, field, string)
 import Json.Decode.Pipeline exposing (decode, optional, required)
@@ -22,12 +22,12 @@ type alias GithubRepo =
 
 
 type alias Model =
-    { owner : Maybe GithubUser, repo : Maybe GithubRepo }
+    { ownerInput: String, owner : Maybe GithubUser, repoInput: String, repo : Maybe GithubRepo }
 
 
 initialModel : Model
 initialModel =
-    { owner = Nothing, repo = Nothing }
+    { owner = Nothing, repo = Nothing, ownerInput = "", repoInput = ""}
 
 
 userDecoder : Decoder GithubUser
@@ -54,8 +54,10 @@ repoDecoder =
 
 type Msg
     = OwnerChange String
+    | OwnerCheck
     | OwnerResp (Result Http.Error GithubUser)
     | RepoChange String
+    | RepoCheck
     | RepoResp (Result Http.Error GithubRepo)
     | NoOp
 
@@ -67,7 +69,10 @@ update msg model =
             ( model, Cmd.none )
 
         OwnerChange str ->
-            ( model, Http.send OwnerResp (lookUpUser str) )
+          ({model | ownerInput = str}, Cmd.none)
+
+        OwnerCheck ->
+            ( model, Http.send OwnerResp (lookUpUser model.ownerInput) )
 
         OwnerResp (Ok user) ->
             ( { model | owner = Just user }, Cmd.none )
@@ -76,9 +81,12 @@ update msg model =
             ( { model | owner = Nothing }, Cmd.none )
 
         RepoChange str ->
+          ({model | repoInput = str}, Cmd.none)
+
+        RepoCheck ->
             case model.owner of
                 Just githubUser ->
-                    ( model, Http.send RepoResp (lookUpRepo githubUser.login str) )
+                    ( model, Http.send RepoResp (lookUpRepo githubUser.login model.repoInput) )
 
                 Nothing ->
                     ( { model | repo = Nothing }, Cmd.none )
@@ -107,10 +115,10 @@ lookUpRepo user query =
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ placeholder "Owner", onInput OwnerChange ] []
+        [ input [ placeholder "Owner", onInput OwnerChange, onBlur OwnerCheck ] []
         , withDefault (text "user not found") (Maybe.map viewUser model.owner)
         , br [] []
-        , input [ placeholder "Repo", onInput RepoChange ] []
+        , input [ placeholder "Repo", onInput RepoChange, onBlur RepoCheck ] []
         , withDefault (text "repo not found") (Maybe.map viewRepo model.repo)
         ]
 
