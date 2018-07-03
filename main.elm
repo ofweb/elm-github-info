@@ -22,12 +22,12 @@ type alias GithubRepo =
 
 
 type alias Model =
-    { ownerInput: String, owner : Maybe GithubUser, repoInput: String, repo : Maybe GithubRepo }
+    { ownerInput : String, owner : Maybe GithubUser, repoInput : String, repo : Maybe GithubRepo }
 
 
 initialModel : Model
 initialModel =
-    { owner = Nothing, repo = Nothing, ownerInput = "", repoInput = ""}
+    { owner = Nothing, repo = Nothing, ownerInput = "", repoInput = "" }
 
 
 userDecoder : Decoder GithubUser
@@ -69,7 +69,7 @@ update msg model =
             ( model, Cmd.none )
 
         OwnerChange str ->
-          ({model | ownerInput = str}, Cmd.none)
+            ( { model | ownerInput = str }, Cmd.none )
 
         OwnerCheck ->
             ( model, Http.send OwnerResp (lookUpUser model.ownerInput) )
@@ -81,7 +81,7 @@ update msg model =
             ( { model | owner = Nothing }, Cmd.none )
 
         RepoChange str ->
-          ({model | repoInput = str}, Cmd.none)
+            ( { model | repoInput = str }, Cmd.none )
 
         RepoCheck ->
             case model.owner of
