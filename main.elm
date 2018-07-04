@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (main, GithubRepo, GithubUser, userDecoder, repoDecoder )
 
 import Html exposing (..)
 import Html.Attributes exposing (alt, height, href, placeholder, src, width)
@@ -7,7 +7,6 @@ import Http
 import Json.Decode as Json exposing (Decoder, field, string)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Maybe exposing (..)
-import Task exposing (..)
 
 
 -- MODEL
@@ -102,7 +101,6 @@ lookUpUser : String -> Http.Request GithubUser
 lookUpUser query =
     Http.get ("https://api.github.com/users/" ++ query) userDecoder
 
-
 lookUpRepo : String -> String -> Http.Request GithubRepo
 lookUpRepo user query =
     Http.get ("https://api.github.com/repos/" ++ user ++ "/" ++ query) repoDecoder
@@ -118,7 +116,6 @@ view model =
         [ input [ placeholder "Owner", onInput OwnerChange, onBlur OwnerCheck ] []
         , withDefault (text "user not found") (Maybe.map viewUser model.owner)
         , br [] []
-        , input [ placeholder "Repo", onInput RepoChange, onBlur RepoCheck ] []
         , withDefault (text "repo not found") (Maybe.map viewRepo model.repo)
         ]
 
@@ -133,5 +130,6 @@ viewRepo githubRepo =
     div [] [ a [ href githubRepo.link ] [ text githubRepo.name ], text (" " ++ githubRepo.description), text (" made in " ++ githubRepo.language) ]
 
 
+main : Program Never Model Msg
 main =
     Html.program { init = ( initialModel, Cmd.none ), view = view, update = update, subscriptions = \_ -> Sub.none }
